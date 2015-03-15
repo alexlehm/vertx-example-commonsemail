@@ -15,6 +15,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
 import org.apache.commons.mail.Email;
+import org.apache.commons.mail.EmailAttachment;
 import org.apache.commons.mail.EmailException;
 import org.junit.After;
 import org.junit.Before;
@@ -36,9 +37,8 @@ public class MailUnitTest {
   Vertx vertx = Vertx.vertx();
 
   @Test
-  public void testMail(TestContext context) throws AddressException, EmailException {
-    log.info("starting");
-
+  public void testMail(TestContext context) throws AddressException,
+      EmailException {
     Async async = context.async();
 
     MailConfig mailConfig = new MailConfig("localhost", 1587);
@@ -47,11 +47,9 @@ public class MailUnitTest {
 
     Email email = new MySimpleEmail();
 
-    email.setFrom("user@example.com")
-      .setBounceAddress("sender@example.com")
-      .setTo(Arrays.asList(new InternetAddress("user@example.net")))
-      .setSubject("Test email")
-      .setMsg("this is a message");
+    email.setFrom("user@example.com").setBounceAddress("sender@example.com")
+        .setTo(Arrays.asList(new InternetAddress("user@example.net")))
+        .setSubject("Test email").setMsg("this is a message");
 
     EmailWrapper.sendMail(mailService, email, result -> {
       log.info("mail finished");
@@ -63,6 +61,76 @@ public class MailUnitTest {
         context.fail(result.cause().toString());
       }
     });
+  }
+
+  @Test
+  public void mailHtml(TestContext context) throws AddressException,
+      EmailException {
+    Async async = context.async();
+
+    MailConfig mailConfig = new MailConfig("localhost", 1587);
+
+    MailService mailService = MailService.create(vertx, mailConfig);
+
+    MyHtmlEmail email = new MyHtmlEmail();
+
+    email.setFrom("user@example.com")
+        .setTo(Arrays.asList(new InternetAddress("user@example.net")))
+        .setSubject("Test email");
+    email.setHtmlMsg("this is a message").setTextMsg("this is a text part");
+
+    EmailWrapper.sendMail(mailService, email, result -> {
+      log.info("mail finished");
+      if (result.succeeded()) {
+        log.info(result.result().toString());
+        async.complete();
+      } else {
+        log.warn("got exception", result.cause());
+        context.fail(result.cause().toString());
+      }
+    });
+  }
+
+  @Test
+  public void mailAttachment(TestContext context) {
+    try {
+      log.info("starting");
+
+      Async async = context.async();
+
+      MailConfig mailConfig = new MailConfig("localhost", 1587);
+
+      MailService mailService = MailService.create(vertx, mailConfig);
+
+      EmailAttachment attachment = new EmailAttachment();
+      attachment.setPath("logo-white-big.png");
+      attachment.setDisposition(EmailAttachment.ATTACHMENT);
+      attachment.setDescription("vert.x logo");
+      attachment.setName("logo-white-big.png");
+
+      MyHtmlEmail email = new MyHtmlEmail();
+      email.setFrom("user@example.com")
+          .setTo(Arrays.asList(new InternetAddress("user@example.net")))
+          .setSubject("attachment mail")
+          .setMsg("This message contains an attachment");
+
+      // attach() may not be safe to use in an async program since it uses
+      // File.exists()
+      email.attach(attachment);
+      EmailWrapper.sendMail(mailService, email, result -> {
+        log.info("mail finished");
+        if (result.succeeded()) {
+          log.info(result.result().toString());
+          async.complete();
+        } else {
+          log.warn("got exception", result.cause());
+          context.fail(result.cause().toString());
+        }
+      });
+    } catch (Exception e) {
+      log.warn("Exception", e);
+      context.fail("got exception");
+    }
   }
 
   @Before

@@ -18,37 +18,40 @@ import org.apache.commons.mail.Email;
 
 public class EmailWrapper {
 
-  private static Logger log=LoggerFactory.getLogger(EmailWrapper.class);
-  
+  private static Logger log = LoggerFactory.getLogger(EmailWrapper.class);
+
   private EmailWrapper() {
   }
 
-  public static void sendMail(MailService service, Email commonsEmail, Handler<AsyncResult<JsonObject>> resultHandler) {
-    MailMessage email = new MailMessage();
+  public static void sendMail(MailService service, Email email,
+      Handler<AsyncResult<JsonObject>> resultHandler) {
+    MailMessage message = new MailMessage();
 
     // prefer bounce address over from address
     // currently (1.3.3) commons mail is missing the getter for bounceAddress
     // I have requested that https://issues.apache.org/jira/browse/EMAIL-146
-    String fromAddr = commonsEmail.getFromAddress().toString();
-    if (commonsEmail instanceof BounceGetter) {
-      String bounceAddr = ((BounceGetter) commonsEmail).getBounceAddress();
+    String fromAddr = email.getFromAddress().toString();
+    if (email instanceof BounceGetter) {
+      String bounceAddr = ((BounceGetter) email).getBounceAddress();
       if (bounceAddr != null && !bounceAddr.isEmpty()) {
         fromAddr = bounceAddr;
       }
     }
 
-    email.setBounceAddress(fromAddr);
-    email.setFrom(commonsEmail.getFromAddress().toString());
-    email.setTo(convertAddresses(commonsEmail.getToAddresses()));
-    email.setCc(convertAddresses(commonsEmail.getCcAddresses()));
-    email.setBcc(convertAddresses(commonsEmail.getBccAddresses()));
+    message.setBounceAddress(fromAddr)
+        .setFrom(email.getFromAddress().toString())
+        .setTo(convertAddresses(email.getToAddresses()))
+        .setCc(convertAddresses(email.getCcAddresses()))
+        .setBcc(convertAddresses(email.getBccAddresses()));
 
-    service.sendMailString(email, createMailMessage(commonsEmail), resultHandler);
+    // TODO: createMailMessage is not async, this should be done in
+    // in a executeBlocking block
+    service.sendMailString(message, createMailMessage(email), resultHandler);
   }
 
   private static List<String> convertAddresses(List<InternetAddress> toAddresses) {
     List<String> addresses = new ArrayList<String>();
-    for(InternetAddress a : toAddresses) {
+    for (InternetAddress a : toAddresses) {
       addresses.add(a.toString());
     }
     return addresses;
