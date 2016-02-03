@@ -2,9 +2,9 @@ package cx.lehmann.vertx.mail;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.impl.LoggerFactory;
+import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.mail.MailConfig;
-import io.vertx.ext.mail.MailService;
+import io.vertx.ext.mail.MailClient;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -17,6 +17,8 @@ import javax.mail.internet.InternetAddress;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailAttachment;
 import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.HtmlEmail;
+import org.apache.commons.mail.SimpleEmail;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,9 +45,9 @@ public class MailUnitTest {
 
     MailConfig mailConfig = new MailConfig("localhost", 1587);
 
-    MailService mailService = MailService.create(vertx, mailConfig);
+    MailClient mailService = MailClient.createShared(vertx, mailConfig);
 
-    Email email = new MySimpleEmail();
+    Email email = new SimpleEmail();
 
     email.setFrom("user@example.com").setBounceAddress("sender@example.com")
         .setTo(Arrays.asList(new InternetAddress("user@example.net")))
@@ -70,9 +72,9 @@ public class MailUnitTest {
 
     MailConfig mailConfig = new MailConfig("localhost", 1587);
 
-    MailService mailService = MailService.create(vertx, mailConfig);
+    MailClient mailService = MailClient.createShared(vertx, mailConfig);
 
-    MyHtmlEmail email = new MyHtmlEmail();
+    HtmlEmail email = new HtmlEmail();
 
     email.setFrom("user@example.com")
         .setTo(Arrays.asList(new InternetAddress("user@example.net")))
@@ -100,7 +102,7 @@ public class MailUnitTest {
 
       MailConfig mailConfig = new MailConfig("localhost", 1587);
 
-      MailService mailService = MailService.create(vertx, mailConfig);
+      MailClient mailService = MailClient.createShared(vertx, mailConfig);
 
       EmailAttachment attachment = new EmailAttachment();
       attachment.setPath("logo-white-big.png");
@@ -108,7 +110,7 @@ public class MailUnitTest {
       attachment.setDescription("vert.x logo");
       attachment.setName("logo-white-big.png");
 
-      MyHtmlEmail email = new MyHtmlEmail();
+      HtmlEmail email = new HtmlEmail();
       email.setFrom("user@example.com")
           .setTo(Arrays.asList(new InternetAddress("user@example.net")))
           .setSubject("attachment mail")
