@@ -83,6 +83,7 @@ public class EmailWrapper {
     }
   }
 
+  @SuppressWarnings("unchecked")
   private static MultiMap getHeaders(Email email) {
     CaseInsensitiveHeaders headers = new CaseInsensitiveHeaders();
     Enumeration<Header> headerEnum;
