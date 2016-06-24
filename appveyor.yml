@@ -1,0 +1,15 @@
+version: 1.0.{build}
+branches:
+  only:
+  - master
+environment:
+  PATH: '%PATH%;C:\tools\apache-maven-3.3.3\bin'
+install:
+- cmd: choco upgrade maven
+cache:
+- C:\tools\apache-maven-3.3.3
+- C:\Users\appveyor\.m2
+build_script:
+- cmd: mvn clean package -DskipTest=true
+test_script:
+- cmd: mvn test
