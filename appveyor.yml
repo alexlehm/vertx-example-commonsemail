@@ -10,7 +10,7 @@ cache:
 - C:\tools\apache-maven-3.3.3
 - C:\Users\appveyor\.m2
 build_script:
-- cmd: mvn clean package -DskipTest=true
+- cmd: mvn clean package -DskipTests=true
 test_script:
 - cmd: mvn test
 on_failure:
