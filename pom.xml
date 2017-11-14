@@ -16,7 +16,7 @@
   <name>Vert.x mail example using apache-commons-email</name>
 
   <properties>
-    <stack.version>3.3.0</stack.version>
+    <stack.version>3.5.0</stack.version>
   </properties>
 
   <dependencyManagement>
@@ -60,7 +60,7 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-email</artifactId>
-      <version>1.4</version>
+      <version>1.5</version>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
